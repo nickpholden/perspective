@@ -9,6 +9,7 @@
         "build": "echo 'No build'",
         "build:logo": "webpack --config logo.config.js --color",
         "build:arrow": "cpx ../node_modules/superstore-arrow/superstore.arrow static/arrow/",
+        "clean": "echo 'No clean'",
         "docs": "npm run build:arrow && npm run build:logo && npm run theme && docusaurus-build",
         "publish-gh-pages": "npm run theme && docusaurus-publish",
         "write-translations": "docusaurus-write-translations"
