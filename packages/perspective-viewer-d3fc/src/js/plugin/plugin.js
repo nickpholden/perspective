@@ -53,7 +53,7 @@ function drawChart(chart) {
             } else {
                 jsonp = view.to_json({leaves_only: true});
             }
-            metadata = await Promise.all([this._table.schema(false), view.computed_schema(false), view.schema(false), jsonp, view.get_config()]);
+            metadata = await Promise.all([this._table.schema(false), view.expression_schema(false), view.schema(false), jsonp, view.get_config()]);
         } catch (e) {
             if (e.message !== "View is not initialized") {
                 throw e;
@@ -64,17 +64,17 @@ function drawChart(chart) {
             return;
         }
 
-        let [table_schema, computed_schema, view_schema, json, config] = metadata;
+        let [table_schema, expression_schema, view_schema, json, config] = metadata;
 
         /**
-         * Retrieve a tree axis column from the table and computed schemas,
+         * Retrieve a tree axis column from the table and expression schemas,
          * returning a String type or `undefined`.
          * @param {String} column a column name
          */
         const get_pivot_column_type = function(column) {
             let type = table_schema[column];
             if (!type) {
-                type = computed_schema[column];
+                type = expression_schema[column];
             }
             return type;
         };
