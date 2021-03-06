@@ -28,6 +28,9 @@
         "test:run": "jest --rootDir=. --config=test/config/jest.config.js --color --verbose",
         "test": "npm-run-all test:build test:run",
         "build": "webpack --color --config src/config/plugin.config.js",
+        "build_for_python": "npm-run-all build_for_python:*",
+        "build_for_python:nbextension": "webpack --color --config src/config/python.config.js",
+        "build_for_python:labextension": "mkdirp ../../python/perspective/perspective/labextension && cd ../../python/perspective/perspective/labextension && npm pack ../../../../packages/perspective-jupyterlab",
         "clean": "rimraf dist",
         "version": "yarn build"
     },
@@ -55,6 +58,6 @@
         "typescript": "^3.7.4"
     },
     "jupyterlab": {
-        "extension": "dist/index.js"
+        "extension": "dist/labextension.js"
     }
-}
+}   

@@ -156,6 +156,8 @@ python/perspective/src
 python/perspective/test
 python/cmake
 python/cpp
+python/perspective/perspective/labextension
+python/perspective/perspective/nbextension
 python/perspective/perspective_python.egg-info
 python/perspective/perspective/tests/table/psp_test
 python/perspective/perspective/node/assets/*

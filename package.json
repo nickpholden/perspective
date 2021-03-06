@@ -94,6 +94,7 @@
         "webpack-cli": "^4.3.1",
         "webpack-dev-server": "^3.11.2",
         "webpack-fix-style-only-entries": "^0.4.0",
+        "webpack-node-externals": "^2.5.2",
         "worker-loader": "^3.0.7"
     },
     "resolutions": {
@@ -116,9 +117,11 @@
         "build_js": "node scripts/build_js.js",
         "build": "node scripts/build.js",
         "build_python": "node scripts/build_python.js",
+        "build_python:dist": "npm-run-all build_js _package_js_for_python build_python",
         "bench": "node scripts/bench.js",
         "bench_python": "python3 python/perspective/bench/perspective_benchmark.py",
         "stresstest_python": "python3 python/perspective/bench/stresstest/main.py",
+        "_package_js_for_python": "yarn workspace @finos/perspective-jupyterlab build_for_python",
         "_wheel_python": "node scripts/_wheel_python.js",
         "setup": "node scripts/setup.js",
         "docs": "node scripts/docs.js",

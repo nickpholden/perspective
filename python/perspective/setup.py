@@ -11,8 +11,12 @@ from setuptools.command.build_ext import build_ext
 from setuptools.command.sdist import sdist
 from distutils.version import LooseVersion
 from codecs import open
+from jupyter_packaging import (
+    ensure_python,
+    ensure_targets,
+    get_version,
+)
 
-import io
 import os
 import os.path
 import re
@@ -65,6 +69,7 @@ if (sys.version_info.major == 2 and sys.version_info.minor < 7) or (
 requires_dev_py2 = [
     "Faker>=1.0.0",
     "flake8>=3.7.8",
+    "jupyter_packaging",
     "mock",
     "pybind11>=2.4.0",
     "pyarrow>=0.16.0",
@@ -82,16 +87,27 @@ requires_dev = [
     "black==20.8b1",
 ] + requires_dev_py2  # for development, remember to install black and flake8-black
 
+nb_path = os.path.join(here, "perspective", "nbextension", "static")
+lab_path = os.path.join(here, "perspective", "labextension")
 
-def get_version(file, name="__version__"):
-    """Get the version of the package from the given file by
-    executing it and extracting the given `name`.
-    """
-    path = os.path.realpath(file)
-    version_ns = {}
-    with io.open(path, encoding="utf8") as f:
-        exec(f.read(), {}, version_ns)
-    return version_ns[name]
+# Representative files that should exist after a successful build
+jstargets = [
+    os.path.join(nb_path, "index.js"),
+    os.path.join(lab_path, "finos-perspective-jupyterlab.tgz"),
+]
+
+package_data_spec = {"perspective": ["nbextension/static/*.*js*", "labextension/*.tgz"]}
+
+data_files_spec = [
+    ("share/jupyter/nbextensions/finos-perspective-jupyterlab", nb_path, "*.js*"),
+    ("share/jupyter/lab/extensions", lab_path, "*.tgz"),
+    ("etc/jupyter/nbconfig/notebook.d", here, "perspective.json"),
+]
+
+
+# Checks
+ensure_python(("2.7", ">=3.6"))
+ensure_targets(jstargets)
 
 
 version = get_version(os.path.join(here, "perspective", "core", "_version.py"))
@@ -229,6 +245,14 @@ class PSPCheckSDist(sdist):
             if not os.path.exists(path):
                 raise Exception(
                     "Path is missing! {}\nMust run `yarn build_python` before building sdist so cmake files are installed".format(
+                        path
+                    )
+                )
+        for path in ("nbextension/static/index.js", "labextension/finos-perspective-jupyterlab-{}.tgz".format(version)):
+            path = os.path.abspath(os.path.join(here, "perspective", path))
+            if not os.path.exists(path):
+                raise Exception(
+                    "Path is missing! {}\nMust run `yarn _package_js_for_python` before building sdist so JS assets installed".format(
                         path
                     )
                 )

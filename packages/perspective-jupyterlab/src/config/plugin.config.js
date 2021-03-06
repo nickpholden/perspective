@@ -58,7 +58,7 @@ module.exports = {
         syncWebAssembly: true
     },
     output: {
-        filename: "[name].js",
+        filename: "labextension.js",
         libraryTarget: "umd",
         path: path.resolve(__dirname, "../../dist")
     }

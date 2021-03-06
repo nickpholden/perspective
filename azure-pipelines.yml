@@ -141,6 +141,13 @@ jobs:
         codeCoverageTool: Cobertura
         summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
 
+    # Build JS assets for python dist
+    - bash: yarn _package_js_for_python --ci $(python_flag) $(manylinux_flag)
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+      displayName: 'Build JS assets for distribution in python package'
+      env:
+        PSP_DOCKER: 1
+
     # Build a python wheel for Manylinux
     - bash: yarn _wheel_python --ci $(python_flag) $(manylinux_flag)
       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
@@ -152,7 +159,7 @@ jobs:
     - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) $(manylinux_flag)
       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
       displayName: 'Test Manylinux Wheel'
-
+      
     # Save the artifact to Azure storage
     - task: PublishPipelineArtifact@1
       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
@@ -301,6 +308,11 @@ jobs:
       inputs: 
         codeCoverageTool: Cobertura
         summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
+
+    # Build JS assets for python dist
+    - bash: yarn _package_js_for_python --ci $(python_flag) $(manylinux_flag)
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+      displayName: 'Build JS assets for distribution in python package'
 
     # Build a python wheel for Mac 10.14
     - bash: yarn _wheel_python --ci $(python_flag) --macos

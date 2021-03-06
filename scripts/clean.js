@@ -35,10 +35,14 @@ try {
             "python/perspective/build",
             "python/perspective/docs/build",
             "python/perspective/perspective_python.egg-info",
+            "python/perspective/pip-wheel-metadata",
             "python/perspective/.coverage",
-            "python/perspective/.pytest_cache",
-            "python/perspective/python_junit.xml",
             "python/perspective/coverage.xml",
+            "python/perspective/.pytest_cache",
+            "python/perspective/.ipynb_checkpoints",
+            "python/perspective/python_junit.xml",
+            "python/perspective/perspective/nbextension/static",
+            "python/perspective/perspective/labextension",
             ...glob.sync("python/perspective/**/*.pyc"),
             ...glob.sync("python/perspective/**/__pycache__")
         );
