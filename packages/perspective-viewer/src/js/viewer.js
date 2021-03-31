@@ -10,7 +10,7 @@
 import {wasm} from "../../dist/esm/@finos/perspective-vieux";
 import "./polyfill.js";
 
-import {bindTemplate, json_attribute, array_attribute, invertPromise, throttlePromise} from "./utils.js";
+import {bindTemplate, json_attribute, array_attribute, invertPromise, throttlePromise, getExpressionAlias, findExpressionByAlias} from "./utils.js";
 import {renderers, register_debug_plugin} from "./viewer/renderers.js";
 import "./row.js";
 import "./expression_editor.js";
@@ -121,10 +121,8 @@ class PerspectiveViewer extends ActionElement {
                     dir = s[1];
                     s = s[0];
                 }
-                let expression = undefined;
-                if (expressions.includes(s)) {
-                    expression = s;
-                }
+                // either the expression string or undefined
+                let expression = findExpressionByAlias(s, expressions);
                 return this._new_row(s, false, false, false, dir, expression);
             },
             (sort, node) => {
@@ -242,10 +240,21 @@ class PerspectiveViewer extends ActionElement {
                 let clear_expressions = false;
 
                 for (const expression of expressions) {
-                    if (expression_schema[expression]) {
+                    let alias = getExpressionAlias(expression);
+
+                    // Each expression from the editor should already have
+                    // an alias set. While we can auto-generate aliases, we
+                    // would need to setAttribute again and risk entering an
+                    // infinite recursion, so just let it fall into the error
+                    // state and clear the expressions.
+                    if (expression_schema[alias]) {
                         validated_expressions.push(expression);
                     } else {
-                        console.error(`Failed to set "expressions" attribute: expression "${expression}" is invalid.`);
+                        if (alias === undefined) {
+                            console.error(`Failed to set "expressions" attribute: "${expression}" does not have an alias, i.e: // Expression Alias \n "x" + "y"`);
+                        } else {
+                            console.error(`Failed to set "expressions" attribute: expression "${expression}" is invalid.`);
+                        }
                         clear_expressions = true;
                     }
                 }
@@ -367,10 +376,8 @@ class PerspectiveViewer extends ActionElement {
                         operand: filter[2]
                     });
                     const name = filter[0];
-                    let expression = undefined;
-                    if (expressions.includes(name)) {
-                        expression = name;
-                    }
+                    // either the expression string or undefined
+                    let expression = findExpressionByAlias(name, expressions);
                     return this._new_row(name, undefined, undefined, fterms, undefined, expression);
                 },
                 (filter, node) =>
@@ -443,10 +450,8 @@ class PerspectiveViewer extends ActionElement {
 
         const inner = this._column_pivots.querySelector("ul");
         this._update_column_list(pivots, inner, (pivot, expressions) => {
-            let expression = undefined;
-            if (expressions.includes(pivot)) {
-                expression = pivot;
-            }
+            // either the expression string or undefined
+            let expression = findExpressionByAlias(pivot, expressions);
             return this._new_row(pivot, undefined, undefined, undefined, undefined, expression);
         });
         this.dispatchEvent(new Event("perspective-config-update"));
@@ -471,10 +476,8 @@ class PerspectiveViewer extends ActionElement {
 
         const inner = this._row_pivots.querySelector("ul");
         this._update_column_list(pivots, inner, (pivot, expressions) => {
-            let expression = undefined;
-            if (expressions.includes(pivot)) {
-                expression = pivot;
-            }
+            // either the expression string or undefined
+            let expression = findExpressionByAlias(pivot, expressions);
             return this._new_row(pivot, undefined, undefined, undefined, undefined, expression);
         });
         this.dispatchEvent(new Event("perspective-config-update"));
