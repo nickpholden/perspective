@@ -47,9 +47,9 @@ function jest_all() {
         --rootDir=.
         --config=packages/perspective-test/jest.all.config.js 
         --color
-        --verbose 
-        --maxWorkers=50%
+        --verbose
         --testPathIgnorePatterns='timezone'
+        --runInBand
         ${getarg("--bail") && "--bail"}
         ${getarg("--debug") || "--silent 2>&1 --noStackTrace"} 
         --testNamePattern="${get_regex()}"`;

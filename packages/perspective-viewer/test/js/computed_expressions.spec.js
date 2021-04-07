@@ -152,6 +152,7 @@ utils.with_server({}, () => {
                     ".perspective-expression-editor__edit_area"
                 );
                 await page.keyboard.press("ArrowDown");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("An expression that doesn't reach max-width should undock the autocomplete", async page => {
@@ -614,7 +615,9 @@ utils.with_server({}, () => {
                 await add_computed_expression(page, 'month_bucket("Ship Date")');
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("row-pivots", '["State", "City"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["State", "City"])), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
             test.capture("Computed expression columns should persist when new computed columns are added.", async page => {
@@ -623,6 +626,7 @@ utils.with_server({}, () => {
                 await add_computed_expression(page, '"Sales" % "Profit"');
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Sales", "Profit"])), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
             // usage
@@ -635,6 +639,7 @@ utils.with_server({}, () => {
                 }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Computed"])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });

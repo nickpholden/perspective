@@ -40,7 +40,9 @@ utils.with_server({}, () => {
                     const viewer = await page.$("perspective-viewer");
                     await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                     await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
                     await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit", "State"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
                     const columns = JSON.parse(await page.evaluate(element => element.getAttribute("columns"), viewer));
                     expect(columns).toEqual(["Sales", "Profit", "State"]);
                     await page.waitForSelector("perspective-viewer:not([updating])");
