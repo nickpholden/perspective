@@ -7,5 +7,9 @@
  *
  */
 module.exports = async function() {
-    await global.__BROWSER__.close();
+    // execute the standard globalTeardown.js
+    const teardown = require(`@finos/perspective-test/src/js/globalTeardown.js`);
+    await teardown();
+
+    global.JUPYTERLAB_PROC.kill("SIGKILL");
 };
