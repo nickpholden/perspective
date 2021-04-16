@@ -40,7 +40,7 @@ utils.with_server({paths: PATHS}, () => {
                             workspace.appendChild(viewer);
                             workspace.appendChild(viewer2);
                         });
-                        await page.waitForSelector("perspective-workspace perspective-viewer:not([updating])");
+                        await page.waitForSelector("perspective-workspace perspective-viewer:not([updating]) + perspective-viewer:not([updating])");
                         await page.evaluate(() => {
                             const viewer = document.body.querySelector('perspective-viewer[name="one"]');
                             const workspace = document.getElementById("workspace");
@@ -71,7 +71,7 @@ utils.with_server({paths: PATHS}, () => {
                 test.capture(
                     "Create multiple",
                     async page => {
-                        await page.evaluate(() => {
+                        await page.evaluate(async () => {
                             const viewer = document.createElement("perspective-viewer");
                             viewer.setAttribute("table", "superstore");
                             viewer.setAttribute("slot", "one");
@@ -82,7 +82,7 @@ utils.with_server({paths: PATHS}, () => {
                             workspace.appendChild(viewer);
                             workspace.appendChild(viewer2);
                         });
-                        await page.waitForSelector("perspective-workspace perspective-viewer:not([updating])");
+                        await page.waitForSelector("perspective-workspace perspective-viewer:not([updating]) + perspective-viewer:not([updating])");
                     },
                     {timeout: 30000}
                 );
@@ -98,6 +98,7 @@ utils.with_server({paths: PATHS}, () => {
                             const workspace = document.getElementById("workspace");
                             workspace.appendChild(viewer);
                         });
+                        await page.waitForTimeout(500);
                         await page.waitForSelector("perspective-workspace perspective-viewer:not([updating])");
                     },
                     {timeout: 30000}

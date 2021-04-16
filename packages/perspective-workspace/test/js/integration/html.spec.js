@@ -44,7 +44,7 @@ utils.with_server({paths: PATHS}, () => {
                 test.capture(
                     "Create Multiple",
                     async page => {
-                        await page.evaluate(() => {
+                        await page.evaluate(async () => {
                             document.body.innerHTML = `
                                 <perspective-workspace>
                                     <perspective-viewer table="superstore"></perspective-viewer>
@@ -53,6 +53,11 @@ utils.with_server({paths: PATHS}, () => {
                             `;
                             const workspace = document.body.querySelector("perspective-workspace");
                             workspace.tables.set("superstore", window.__TABLE__);
+                            const viewers = document.body.querySelectorAll("perspective-viewer");
+
+                            for (const viewer of viewers) {
+                                await viewer.flush();
+                            }
                         });
                         while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                     },
@@ -62,7 +67,7 @@ utils.with_server({paths: PATHS}, () => {
                 test.capture(
                     "Create multiple with names",
                     async page => {
-                        await page.evaluate(() => {
+                        await page.evaluate(async () => {
                             document.body.innerHTML = `
                                 <perspective-workspace>
                                     <perspective-viewer name="Table 1" table="superstore"></perspective-viewer>
@@ -71,6 +76,11 @@ utils.with_server({paths: PATHS}, () => {
                             `;
                             const workspace = document.body.querySelector("perspective-workspace");
                             workspace.tables.set("superstore", window.__TABLE__);
+                            const viewers = document.body.querySelectorAll("perspective-viewer");
+
+                            for (const viewer of viewers) {
+                                await viewer.flush();
+                            }
                         });
                         while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                     },

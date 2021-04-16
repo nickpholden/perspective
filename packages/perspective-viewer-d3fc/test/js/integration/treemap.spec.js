@@ -44,6 +44,7 @@ utils.with_server({}, () => {
                     await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit", "State"]'), viewer);
                     await page.waitForSelector("perspective-viewer:not([updating])");
                     const columns = JSON.parse(await page.evaluate(element => element.getAttribute("columns"), viewer));
+                    await page.waitForSelector("perspective-viewer:not([updating])");
                     expect(columns).toEqual(["Sales", "Profit", "State"]);
                     await page.waitForSelector("perspective-viewer:not([updating])");
                     await page.mouse.move(0, 0);
@@ -59,6 +60,7 @@ utils.with_server({}, () => {
                         {},
                         viewer
                     );
+                    await page.waitForSelector("perspective-viewer:not([updating])");
                 },
                 {preserve_hover: true}
             );

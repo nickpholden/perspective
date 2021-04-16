@@ -721,6 +721,7 @@ utils.with_server({}, () => {
 
             test.capture("adds computed expression via attribute in classic syntax", async page => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => {
                     const computed = [
@@ -740,6 +741,7 @@ utils.with_server({}, () => {
                 }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("row-pivots", JSON.stringify(["First", "Second"])), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Sales", "Profit"])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
