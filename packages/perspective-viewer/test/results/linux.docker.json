@@ -52,6 +52,8 @@
     "Expressions_saving_a_single_expression_should_add_it_to_inactive_columns_": "8a9a833d2a69e0cbefdf3d0e5fd7054b",
     "Expressions_Expression_columns_should_persist_when_new_views_are_created_": "7e96cb5e340cb27cc036ae38ee93f180",
     "Expressions_Expression_columns_should_persist_when_new_columns_are_added_": "f0f769b39a495d383ef1533e2b952543",
+    "Expressions_adding_new_column_should_not_reset_columns_": "f55bc3b6bea1ff6609e3114b86eb937e",
+    "Expressions_sets_column_with_expression_column_": "1f88e5092d697d1cf3ea236dc75fb03a",
     "Expressions_aggregates_by_expression_column_": "f7de23340bdf37d447efa938fa4be295",
     "Expressions_row_pivots_by_expression_column_": "4e660863bb8f6ed2cf63d56b69bed10e",
     "Expressions_column_pivots_by_expression_column_": "44f7a21e98571a4a8417e15b6d9b9b08",

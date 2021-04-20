@@ -32,6 +32,16 @@ class TestViewExpression(object):
         }
         assert view.expression_schema() == {"computed": float}
 
+    def test_view_expression_create_no_alias(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        view = table.view(expressions=['"a" + "b"'])
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            '"a" + "b"': [6, 8, 10, 12],
+        }
+        assert view.expression_schema() == {'"a" + "b"': float}
+
     def test_view_expression_should_not_overwrite_real(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         with raises(PerspectiveCppError) as ex:

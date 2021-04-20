@@ -377,6 +377,27 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
+            test.capture("sets column with expression column.", async page => {
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
+                await add_expression(page, "1 + 2");
+                await add_expression(page, "// abc \n 1 + 2");
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => element.setAttribute("columns", '["abc", "1 + 2"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
+
+            test.capture("adding new column should not reset columns.", async page => {
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
+                await add_expression(page, "1 + 2");
+                await add_expression(page, "100");
+                await add_expression(page, "// abc \n 1 + 2");
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => element.setAttribute("columns", '["abc", "1 + 2", "100"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await add_expression(page, "// def \n 1 + 2");
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
+
             test.capture("row pivots by expression column.", async page => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_expression(page, "1 + 2");
