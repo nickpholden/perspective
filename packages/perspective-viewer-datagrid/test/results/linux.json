@@ -16,5 +16,5 @@
     "superstore_resets_viewable_area_when_the_physical_size_expands_": "62a1515d85cc4e192f9122180ae98173",
     "superstore_perspective_dispatches_perspective-click_event_with_correct_details": "62a1515d85cc4e192f9122180ae98173",
     "superstore_perspective_dispatches_perspective-click_event_with_correct_details_when_filter_is_set": "738133e4e81d30da994bbfcf6387cca7",
-    "__GIT_COMMIT__": "2255453593b0c5373427f4bf88a1d73b3e5aa769"
+    "__GIT_COMMIT__": "1b2dcc9de7ad92dd6f9983909c7d32eefe2961de"
 }
