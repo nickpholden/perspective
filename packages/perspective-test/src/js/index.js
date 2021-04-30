@@ -80,7 +80,8 @@ async function get_new_page() {
         }
     });
 
-    // Disable all alerts and dialogs
+    // Disable all alerts and dialogs, as Jupyterlab alerts when trying to
+    // navigate off the page, which will block test completion.
     page.on("dialog", async dialog => {
         await dialog.accept();
     });
