@@ -7,10 +7,24 @@
  *
  */
 const path = require("path");
+const {request} = require("http");
 const {spawn} = require("child_process");
 
 const ROOT = path.join(__dirname, "..", "..", "..", "..", "..");
 const PACKAGE_ROOT = path.join(__dirname, "..", "..", "..");
+
+const wait_for_jlab = async function() {
+    let loaded = false;
+
+    while (!loaded) {
+        const req = request(`http://localhost:${process.env.__JUPYTERLAB_PORT__}`).end();
+        req.on("error", () => console.error);
+        req.on("response", () => {
+            loaded = true;
+        });
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+};
 
 module.exports = async function() {
     // link and install the local jupyterlab plugin
@@ -42,4 +56,7 @@ module.exports = async function() {
     // Puppeteer browser instance.
     const setup = require(`@finos/perspective-test/src/js/globalSetup.js`);
     await setup();
+
+    // wait for Jupyter to start
+    await wait_for_jlab();
 };

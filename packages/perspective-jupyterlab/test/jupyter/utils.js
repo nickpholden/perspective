@@ -8,9 +8,7 @@
  */
 const fs = require("fs");
 const path = require("path");
-const {promisify} = require("util");
 const rimraf = require("rimraf");
-const exec = promisify(require("child_process").exec);
 const notebook_template = require("./notebook_template.json");
 
 const DIST_ROOT = path.join(__dirname, "..", "..", "dist", "umd");
@@ -21,22 +19,14 @@ const remove_jupyter_artifacts = () => {
     rimraf(path.join(DIST_ROOT, ".ipynb_checkpoints"), () => {});
 };
 
-// Add Jupyterlab-specific bindings to the global Jest objects
-describe.jupyter = (body, {name, root} = {}) => {
-    if (!root) throw new Error("Jupyter tests require a test root!");
-
-    // Remove the automatically generated workspaces directory, as it
-    // will try to redirect single-document URLs to the last URL opened.
-    beforeEach(remove_jupyter_artifacts);
-    afterAll(remove_jupyter_artifacts);
-
-    // URL is null because each test.capture_jupyterlab will have its own
-    // unique notebook generated.
-    return describe.page(null, body, {reload_page: false, name: name, root: root});
-};
-
-test.capture_jupyterlab = (name, cells, body, args = {}) => {
-    const notebook_name = `${name.replace(/[ \.']/g, "_")}.ipynb`;
+/**
+ * Generate a new Jupyter notebook using the standard JSON template, and
+ * save it into dist/umd so that the tests can use the resulting notebook.
+ *
+ * @param {String} notebook_name
+ * @param {Array<String>} cells
+ */
+const generate_notebook = (notebook_name, cells) => {
     const notebook_path = path.join(DIST_ROOT, notebook_name);
 
     // deepcopy the notebook template so we are not modifying a shared object
@@ -65,8 +55,39 @@ test.capture_jupyterlab = (name, cells, body, args = {}) => {
         });
     }
 
-    // Write the notebook to dist/umd
+    // Write the notebook to dist/umd, which acts as the working directory
+    // for the Jupyterlab test server.
     fs.writeFileSync(notebook_path, JSON.stringify(nb));
+};
+
+// Add Jupyterlab-specific bindings to the global Jest objects
+describe.jupyter = (body, {name, root} = {}) => {
+    if (!root) throw new Error("Jupyter tests require a test root!");
+
+    // Remove the automatically generated workspaces directory, as it
+    // will try to redirect single-document URLs to the last URL opened.
+    beforeEach(remove_jupyter_artifacts);
+    afterAll(remove_jupyter_artifacts);
+
+    // URL is null because each test.capture_jupyterlab will have its own
+    // unique notebook generated.
+    return describe.page(null, body, {reload_page: false, name: name, root: root});
+};
+
+/**
+ * Perform screenshot tests on a Jupyterlab notebook composed of the given
+ * `cells`, which should render a single `perspective-viewer` to the screen.
+ *
+ * @param {String} name The name of the test case.
+ * @param {Array<String>} cells An array of string cells to be executed
+ *  linearly in the resulting notebook. Cells are rendered as typed, so
+ *  newlines, indents etc. must be in the cell text.
+ * @param {*} body
+ * @param {*} args
+ */
+test.capture_jupyterlab = (name, cells, body, args = {}) => {
+    const notebook_name = `${name.replace(/[ \.']/g, "_")}.ipynb`;
+    generate_notebook(notebook_name, cells);
 
     args = Object.assign(args, {
         jupyter: true,
@@ -78,25 +99,23 @@ test.capture_jupyterlab = (name, cells, body, args = {}) => {
     test.capture(name, body, args);
 };
 
+/**
+ * Execute body() on a Jupyter notebook without taking any screenshots.
+ *
+ * @param {*} name
+ * @param {*} cells
+ * @param {*} body
+ */
+test.jupyterlab = async (name, cells, body, args = {}) => {
+    const notebook_name = `${name.replace(/[ \.']/g, "_")}.ipynb`;
+    generate_notebook(notebook_name, cells);
+    args = Object.assign(args, {
+        url: `doc/tree/${notebook_name}`
+    });
+    await test.run(name, body, args);
+};
+
 module.exports = {
-    get_jupyter_token: async () => {
-        const result = await exec("jupyter server list");
-        if (result.stdout === "Currently running servers:") {
-            throw new Error("[get_jupyter_token] Jupyter servers not running!");
-        }
-        const servers = result.stdout.split("\n").slice(1);
-
-        for (const server of servers) {
-            let data = server.split("::");
-            let url = data[0];
-            let path = data[1];
-
-            if (path.includes("perspective-jupyterlab/dist/umd")) {
-                const token = url.trim().split("?token=");
-                return token[token.length - 1].trim();
-            }
-        }
-    },
     restart_kernel: async page => {
         await page.waitForSelector(".p-Widget", {visible: true});
         await page.waitForSelector(".jp-NotebookPanel-toolbar");
