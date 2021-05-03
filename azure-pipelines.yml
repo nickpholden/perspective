@@ -56,16 +56,16 @@ jobs:
     - bash: yarn build_js --ci
       displayName: "Build"
 
-    - bash: yarn test_js --quiet --ci
-      displayName: "Test"
-      env:
-        PSP_DOCKER: 1
+    # - bash: yarn test_js --quiet --ci
+    #   displayName: "Test"
+    #   env:
+    #     PSP_DOCKER: 1
 
-    - task: PublishTestResults@2
-      condition: succeeded()
-      inputs:
-        testRunner: JUnit
-        testResultsFiles: 'junit.xml'
+    # - task: PublishTestResults@2
+    #   condition: succeeded()
+    #   inputs:
+    #     testRunner: JUnit
+    #     testResultsFiles: 'junit.xml'
 
     - bash: tar -czvf perspective.tar.gz ./packages/*/dist
       displayName: "Tarball Perspective dist"
@@ -76,29 +76,29 @@ jobs:
         targetPath: '$(System.DefaultWorkingDirectory)/perspective.tar.gz'
         artifactName: "perspective"
 
-    - task: PublishPipelineArtifact@1
-      condition: failed()
-      inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer/screenshots/'
-        artifactName: "perspective-viewer-screenshots"
+    # - task: PublishPipelineArtifact@1
+    #   condition: failed()
+    #   inputs:
+    #     targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer/screenshots/'
+    #     artifactName: "perspective-viewer-screenshots"
 
-    - task: PublishPipelineArtifact@1
-      condition: failed()
-      inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-datagrid/screenshots/'
-        artifactName: "perspective-viewer-datagrid-screenshots"
+    # - task: PublishPipelineArtifact@1
+    #   condition: failed()
+    #   inputs:
+    #     targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-datagrid/screenshots/'
+    #     artifactName: "perspective-viewer-datagrid-screenshots"
 
-    - task: PublishPipelineArtifact@1
-      condition: failed()
-      inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-d3fc/screenshots/'
-        artifactName: "perspective-viewer-d3fc-screenshots"
+    # - task: PublishPipelineArtifact@1
+    #   condition: failed()
+    #   inputs:
+    #     targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-d3fc/screenshots/'
+    #     artifactName: "perspective-viewer-d3fc-screenshots"
 
-    - task: PublishPipelineArtifact@1
-      condition: failed()
-      inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-workspace/screenshots/'
-        artifactName: "perspective-workspace-screenshots"
+    # - task: PublishPipelineArtifact@1
+    #   condition: failed()
+    #   inputs:
+    #     targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-workspace/screenshots/'
+    #     artifactName: "perspective-workspace-screenshots"
 
 - job: "Jupyterlab"
   dependsOn: ["WebAssembly", "MacOS_Catalina"]
@@ -142,7 +142,7 @@ jobs:
 
     - task: DownloadPipelineArtifact@2
       inputs:
-        artifact: "cp39-cp39m-macosx_10_15_x86_64"
+        artifact: "cp39-cp39-macosx_10_15_x86_64"
         path: $(System.DefaultWorkingDirectory)
 
     - bash: python -m pip install $(System.DefaultWorkingDirectory)/*.whl
