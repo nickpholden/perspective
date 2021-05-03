@@ -117,6 +117,14 @@ jobs:
     - bash: yarn --frozen-lockfile
       displayName: "Install Deps"
 
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: "cp39-cp39-macosx_10_15_x86_64"
+        path: $(System.DefaultWorkingDirectory)
+
+    - bash: python -m pip install $(System.DefaultWorkingDirectory)/*.whl
+      displayName: "Install perspective-python from wheel"
+
     - bash: python -m pip install jupyterlab
       displayName: "Install Jupyterlab"
 
@@ -140,181 +148,178 @@ jobs:
     - bash: yarn jlab_link
       displayName: "Link local Perspective to Jupyterlab"
 
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        artifact: "cp39-cp39-macosx_10_15_x86_64"
-        path: $(System.DefaultWorkingDirectory)
-
-    - bash: python -m pip install $(System.DefaultWorkingDirectory)/*.whl
-      displayName: "Install perspective-python from wheel"
+    # TODO: no idea why this doesn't work here but does work inside all other
+    # invocations
+    - bash: yarn global add npm-run-all cpx
+      displayName: "Install deps again"
 
     - bash: cd packages/perspective-jupyterlab && yarn test:jupyter
       displayName: "Run Jupyterlab tests"
 
 
-- job: 'Linux'
-  pool:
-    vmImage: 'ubuntu-16.04'
+# - job: 'Linux'
+#   pool:
+#     vmImage: 'ubuntu-16.04'
 
-  strategy:
-    matrix:
-      # Python27ManyLinux2010:
-      #   python.version: '2.7'
-      #   python_flag: '--python2'
-      #   manylinux_flag: '--manylinux2010'
-      #   artifact_name: 'cp27-cp27m-manylinux2010_x86_64'
-      Python37ManyLinux2010:
-        python.version: '3.7'
-        python_flag: ''
-        manylinux_flag: '--manylinux2010'
-        artifact_name: 'cp37-cp37m-manylinux2010_x86_64'
+#   strategy:
+#     matrix:
+#       # Python27ManyLinux2010:
+#       #   python.version: '2.7'
+#       #   python_flag: '--python2'
+#       #   manylinux_flag: '--manylinux2010'
+#       #   artifact_name: 'cp27-cp27m-manylinux2010_x86_64'
+#       Python37ManyLinux2010:
+#         python.version: '3.7'
+#         python_flag: ''
+#         manylinux_flag: '--manylinux2010'
+#         artifact_name: 'cp37-cp37m-manylinux2010_x86_64'
 
-      ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
-        Python36ManyLinux2010:
-          python.version: '3.6'
-          python_flag: '--python36'
-          manylinux_flag: '--manylinux2010'
-          artifact_name: 'cp36-cp36m-manylinux2010_x86_64'
-        Python36ManyLinux2014:
-          python.version: '3.6'
-          python_flag: '--python36'
-          manylinux_flag: '--manylinux2014'
-          artifact_name: 'cp36-cp36m-manylinux2014_x86_64'
-        # Python37ManyLinux2010 is always built
-        Python37ManyLinux2014:
-          python.version: '3.7'
-          python_flag: ''
-          manylinux_flag: '--manylinux2014'
-          artifact_name: 'cp37-cp37m-manylinux2014_x86_64'
-        Python38ManyLinux2010:
-          python.version: '3.8'
-          python_flag: '--python38'
-          manylinux_flag: '--manylinux2010'
-          artifact_name: 'cp38-cp38-manylinux2010_x86_64'
-        Python38ManyLinux2014:
-          python.version: '3.8'
-          python_flag: '--python38'
-          manylinux_flag: '--manylinux2014'
-          artifact_name: 'cp38-cp38-manylinux2014_x86_64'
-        Python39ManyLinux2010:
-          python.version: '3.9'
-          python_flag: '--python39'
-          manylinux_flag: '--manylinux2010'
-          artifact_name: 'cp39-cp39-manylinux2010_x86_64'
-        Python39ManyLinux2014:
-          python.version: '3.9'
-          python_flag: '--python39'
-          manylinux_flag: '--manylinux2014'
-          artifact_name: 'cp39-cp39-manylinux2014_x86_64'
+#       ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
+#         Python36ManyLinux2010:
+#           python.version: '3.6'
+#           python_flag: '--python36'
+#           manylinux_flag: '--manylinux2010'
+#           artifact_name: 'cp36-cp36m-manylinux2010_x86_64'
+#         Python36ManyLinux2014:
+#           python.version: '3.6'
+#           python_flag: '--python36'
+#           manylinux_flag: '--manylinux2014'
+#           artifact_name: 'cp36-cp36m-manylinux2014_x86_64'
+#         # Python37ManyLinux2010 is always built
+#         Python37ManyLinux2014:
+#           python.version: '3.7'
+#           python_flag: ''
+#           manylinux_flag: '--manylinux2014'
+#           artifact_name: 'cp37-cp37m-manylinux2014_x86_64'
+#         Python38ManyLinux2010:
+#           python.version: '3.8'
+#           python_flag: '--python38'
+#           manylinux_flag: '--manylinux2010'
+#           artifact_name: 'cp38-cp38-manylinux2010_x86_64'
+#         Python38ManyLinux2014:
+#           python.version: '3.8'
+#           python_flag: '--python38'
+#           manylinux_flag: '--manylinux2014'
+#           artifact_name: 'cp38-cp38-manylinux2014_x86_64'
+#         Python39ManyLinux2010:
+#           python.version: '3.9'
+#           python_flag: '--python39'
+#           manylinux_flag: '--manylinux2010'
+#           artifact_name: 'cp39-cp39-manylinux2010_x86_64'
+#         Python39ManyLinux2014:
+#           python.version: '3.9'
+#           python_flag: '--python39'
+#           manylinux_flag: '--manylinux2014'
+#           artifact_name: 'cp39-cp39-manylinux2014_x86_64'
 
-  steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(python.version)'
-        architecture: 'x64'
+#   steps:
+#     - task: UsePythonVersion@0
+#       inputs:
+#         versionSpec: '$(python.version)'
+#         architecture: 'x64'
 
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '12.x'
+#     - task: NodeTool@0
+#       inputs:
+#         versionSpec: '12.x'
 
-    - bash: npm install -g yarn
-      displayName: "Install Yarn"
+#     - bash: npm install -g yarn
+#       displayName: "Install Yarn"
 
-    - bash: yarn
-      displayName: 'Install JS Deps'
+#     - bash: yarn
+#       displayName: 'Install JS Deps'
 
-    - bash: python -m pip install -U "black==20.8b1" flake8-black pip
-      condition: and(succeeded(), ne(variables['python.version'], '2.7'))
-      displayName: 'Install Python deps'
+#     - bash: python -m pip install -U "black==20.8b1" flake8-black pip
+#       condition: and(succeeded(), ne(variables['python.version'], '2.7'))
+#       displayName: 'Install Python deps'
 
-    - bash: yarn build_python  --ci $(python_flag) $(manylinux_flag)
-      displayName: 'build'
-      env:
-        PSP_DOCKER: 1
+#     - bash: yarn build_python  --ci $(python_flag) $(manylinux_flag)
+#       displayName: 'build'
+#       env:
+#         PSP_DOCKER: 1
 
-    - task: PublishTestResults@2
-      condition: succeededOrFailed()
-      inputs:
-        testResultsFiles: 'python/perspective/python_junit.xml'
-        testRunTitle: 'Publish test results for Python $(python.version) $(manylinux_flag)'
+#     - task: PublishTestResults@2
+#       condition: succeededOrFailed()
+#       inputs:
+#         testResultsFiles: 'python/perspective/python_junit.xml'
+#         testRunTitle: 'Publish test results for Python $(python.version) $(manylinux_flag)'
 
-    - task: PublishCodeCoverageResults@1
-      inputs: 
-        codeCoverageTool: Cobertura
-        summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
+#     - task: PublishCodeCoverageResults@1
+#       inputs: 
+#         codeCoverageTool: Cobertura
+#         summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
 
-    # Build a python wheel for Manylinux
-    - bash: yarn _wheel_python --ci $(python_flag) $(manylinux_flag)
-      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
-      displayName: 'Build Manylinux Wheel'
-      env:
-        PSP_DOCKER: 1
+#     # Build a python wheel for Manylinux
+#     - bash: yarn _wheel_python --ci $(python_flag) $(manylinux_flag)
+#       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+#       displayName: 'Build Manylinux Wheel'
+#       env:
+#         PSP_DOCKER: 1
 
-    # Test the wheel
-    - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) $(manylinux_flag)
-      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
-      displayName: 'Test Manylinux Wheel'
+#     # Test the wheel
+#     - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) $(manylinux_flag)
+#       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+#       displayName: 'Test Manylinux Wheel'
 
-    # Save the artifact to Azure storage
-    - task: PublishPipelineArtifact@1
-      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
-      inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/'
-        artifactName: '$(artifact_name)'
+#     # Save the artifact to Azure storage
+#     - task: PublishPipelineArtifact@1
+#       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+#       inputs:
+#         targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/'
+#         artifactName: '$(artifact_name)'
 
-- job: 'Windows'
-  pool:
-    vmImage: 'vs2017-win2016'
+# - job: 'Windows'
+#   pool:
+#     vmImage: 'vs2017-win2016'
 
-  strategy:
-    matrix:
-      Python37:
-        python.version: '3.7'
-        python_flag: ''
-      ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
-        Python36:
-          python.version: '3.6'
-          python_flag: '--python36'
-        Python38:
-          python.version: '3.8'
-          python_flag: '--python38'
-        Python39:
-          python.version: '3.9'
-          python_flag: '--python39'
+#   strategy:
+#     matrix:
+#       Python37:
+#         python.version: '3.7'
+#         python_flag: ''
+#       ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
+#         Python36:
+#           python.version: '3.6'
+#           python_flag: '--python36'
+#         Python38:
+#           python.version: '3.8'
+#           python_flag: '--python38'
+#         Python39:
+#           python.version: '3.9'
+#           python_flag: '--python39'
 
-  steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(python.version)'
-        architecture: 'x64'
+#   steps:
+#     - task: UsePythonVersion@0
+#       inputs:
+#         versionSpec: '$(python.version)'
+#         architecture: 'x64'
 
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '12.x'
+#     - task: NodeTool@0
+#       inputs:
+#         versionSpec: '12.x'
 
-    - script: |
-        which python > python.txt
-        set /p PYTHON=<python.txt
-        ln -s %PYTHON% %PYTHON%$(python.version)
-        python --version
-        which python$(python.version)
-      displayName: "Which python"
+#     - script: |
+#         which python > python.txt
+#         set /p PYTHON=<python.txt
+#         ln -s %PYTHON% %PYTHON%$(python.version)
+#         python --version
+#         which python$(python.version)
+#       displayName: "Which python"
 
-    - script: |
-        python -m pip install -U numpy "pyarrow>=2" pip
-      displayName: "Python deps"
+#     - script: |
+#         python -m pip install -U numpy "pyarrow>=2" pip
+#       displayName: "Python deps"
 
-    - script: npm install -g yarn
-      displayName: "Install Yarn"
+#     - script: npm install -g yarn
+#       displayName: "Install Yarn"
 
-    - script: yarn
-      displayName: 'Install JS Deps'
+#     - script: yarn
+#       displayName: 'Install JS Deps'
 
-    - script: choco install boost-msvc-14.1 flatc
-      displayName: "System deps"
+#     - script: choco install boost-msvc-14.1 flatc
+#       displayName: "System deps"
 
-    - script: yarn build_python --ci $(python_flag)
-      displayName: 'build'
+#     - script: yarn build_python --ci $(python_flag)
+#       displayName: 'build'
 
 - job: 'MacOS_Catalina'
   pool:
@@ -323,10 +328,10 @@ jobs:
   strategy:
     matrix:
 
-      Python37:
-        python.version: '3.7'
-        python_flag: ''
-        artifact_name: 'cp37-cp37m-macosx_10_15_x86_64'
+      # Python37:
+      #   python.version: '3.7'
+      #   python_flag: ''
+      #   artifact_name: 'cp37-cp37m-macosx_10_15_x86_64'
       Python39:
         python.version: '3.9'
         python_flag: '--python39'
