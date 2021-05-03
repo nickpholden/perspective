@@ -66,79 +66,56 @@ jobs:
       inputs:
         testRunner: JUnit
         testResultsFiles: 'junit.xml'
-    
-    # TODO: only artifact the /dist folders inside each package, not the
-    # entire packages folder - it probably has to be a new publish task
-    # for each package, or maybe we tarball it and copy it back out into
-    # the right folder structure.
-    - task: PublishPipelineArtifact@1
-      condition: succeeded()
-      inputs:
-        targetPath: $(System.DefaultWorkingDirectory)/packages
-        artifactName: "perspective-build"
 
-    # TODO: checkout the code in jlab task and stop copying extraneous
-    # stuff over
+    - bash: tar -czvf perspective.tar.gz ./packages/*/dist
+      displayName: "Tarball Perspective dist"
+  
     - task: PublishPipelineArtifact@1
       condition: succeeded()
       inputs:
-        targetPath: $(System.DefaultWorkingDirectory)/scripts
-        artifactName: "perspective-scripts"
-
-    - task: PublishPipelineArtifact@1
-      condition: succeeded()
-      inputs:
-        targetPath: $(System.DefaultWorkingDirectory)/package.json
-        artifactName: "perspective-package-json"
-
-    - task: PublishPipelineArtifact@1
-      condition: succeeded()
-      inputs:
-        targetPath: $(System.DefaultWorkingDirectory)/yarn.lock
-        artifactName: "perspective-yarn-lock"
+        targetPath: '$(System.DefaultWorkingDirectory)/perspective.tar.gz'
+        artifactName: "perspective"
 
     - task: PublishPipelineArtifact@1
       condition: failed()
       inputs:
         targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer/screenshots/'
-        artifactName: "perspective-viewer"
+        artifactName: "perspective-viewer-screenshots"
 
     - task: PublishPipelineArtifact@1
       condition: failed()
       inputs:
         targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-datagrid/screenshots/'
-        artifactName: "perspective-viewer-datagrid"
+        artifactName: "perspective-viewer-datagrid-screenshots"
 
     - task: PublishPipelineArtifact@1
       condition: failed()
       inputs:
         targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-d3fc/screenshots/'
-        artifactName: "perspective-viewer-d3fc"
+        artifactName: "perspective-viewer-d3fc-screenshots"
 
     - task: PublishPipelineArtifact@1
       condition: failed()
       inputs:
         targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-workspace/screenshots/'
-        artifactName: "perspective-workspace"
-
-    - task: PublishTestResults@2
-      condition: succeeded()
+        artifactName: "perspective-workspace-screenshots"
 
 - job: "Jupyterlab"
-  dependsOn: ["WebAssembly", "Linux"]
+  dependsOn: ["WebAssembly", "MacOS_Catalina"]
   pool: 
-    vmImage: "ubuntu-16.04"
+    vmImage: "macos-10.15"
 
   steps:
-    - checkout: none
-
     - task: UsePythonVersion@0
       inputs:
-        versionSpec: '3.7'
+        versionSpec: '3.9'
 
     - task: NodeTool@0
       inputs:
         versionSpec: "12.x"
+
+    - bash: yarn --frozen-lockfile
+      displayName: "Install Deps"
 
     - bash: python -m pip install jupyterlab
       displayName: "Install Jupyterlab"
@@ -146,52 +123,32 @@ jobs:
     - bash: jupyter labextension install @jupyter-widgets/jupyterlab-manager
       displayName: "Install Labextensions"
 
-    - bash: mkdir packages scripts
-      displayName: "mkdir"
-
-    # TODO: this needs to be a single zip
     - task: DownloadPipelineArtifact@2
       inputs:
-        artifact: "perspective-build"
-        path: $(System.DefaultWorkingDirectory)/packages
-    
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        artifact: "perspective-package-json"
-        path: $(System.DefaultWorkingDirectory)
-        
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        artifact: "perspective-yarn-lock"
+        artifact: "perspective"
         path: $(System.DefaultWorkingDirectory)
 
-    # TODO: this should hit the cached versions I think
-    - bash: yarn --frozen-lockfile
-      displayName: "Install Deps"
-    
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        artifact: "perspective-scripts"
-        path: $(System.DefaultWorkingDirectory)/scripts
+    - bash: tar -xvf $(System.DefaultWorkingDirectory)/perspective.tar.gz
+      displayName: "Unzip Perspective Tarball"
 
-    - bash: ls packages
-      displayName: "ls"
+    - bash: ls packages/*/dist
+      displayName: "ls2"
 
     - bash: jupyter labextension install packages/perspective-jupyterlab
       displayName: "Install perspective-jupyterlab"
 
-    - bash: jupyter labextension link packages/perspective packages/perspective-viewer packages/perspective-viewer-d3fc packages/perspective-viewer-datagrid
+    - bash: yarn jlab_link
       displayName: "Link local Perspective to Jupyterlab"
 
     - task: DownloadPipelineArtifact@2
       inputs:
-        artifact: "cp37-cp37m-manylinux2010_x86_64"
+        artifact: "cp39-cp39m-macosx_10_15_x86_64"
         path: $(System.DefaultWorkingDirectory)
 
     - bash: python -m pip install $(System.DefaultWorkingDirectory)/*.whl
       displayName: "Install perspective-python from wheel"
 
-    - bash: cd packages/perspective-jupyterlab && yarn test:jupyter:build && yarn:test:jupyter:run
+    - bash: cd packages/perspective-jupyterlab && yarn test:jupyter
       displayName: "Run Jupyterlab tests"
 
 
