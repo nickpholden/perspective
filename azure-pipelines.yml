@@ -120,9 +120,9 @@ jobs:
     - task: DownloadPipelineArtifact@2
       inputs:
         artifact: "cp39-cp39-macosx_10_15_x86_64"
-        path: $(System.DefaultWorkingDirectory)
+        path: $(System.DefaultWorkingDirectory)/wheel
 
-    - bash: python -m pip install $(System.DefaultWorkingDirectory)/*.whl
+    - bash: python -m pip install $(System.DefaultWorkingDirectory)/wheel/*.whl
       displayName: "Install perspective-python from wheel"
 
     - bash: python -m pip install jupyterlab
@@ -139,18 +139,16 @@ jobs:
     - bash: tar -xvf $(System.DefaultWorkingDirectory)/perspective.tar.gz
       displayName: "Unzip Perspective Tarball"
 
-    - bash: ls packages/*/dist
-      displayName: "ls2"
-
     - bash: jupyter labextension install packages/perspective-jupyterlab
       displayName: "Install perspective-jupyterlab"
 
-    - bash: cd $(System.DefaultWorkingDirectory) && yarn jlab_link
+    - bash: node scripts/jlab_link.js #yarn jlab_link
       displayName: "Link local Perspective to Jupyterlab"
 
-    - bash: yarn test --jupyter
+    - bash: node scripts/test_js.js --jupyter
       displayName: "Run Jupyterlab tests"
       env:
+        PACKAGE: perspective-jupyterlab
         PSP_DOCKER: 1
 
 
