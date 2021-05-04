@@ -142,10 +142,10 @@ jobs:
     - bash: jupyter labextension install packages/perspective-jupyterlab
       displayName: "Install perspective-jupyterlab"
 
-    - bash: node scripts/jlab_link.js #yarn jlab_link
+    - bash: yarn jlab_link
       displayName: "Link local Perspective to Jupyterlab"
 
-    - bash: node scripts/test_js.js --jupyter
+    - bash: yarn test_js --jupyter
       displayName: "Run Jupyterlab tests"
       env:
         PACKAGE: perspective-jupyterlab
