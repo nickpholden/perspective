@@ -130,7 +130,7 @@ try {
 
         // Cleanup after successful test run.
         console.log("-- [DOCKER] Cleaning up Jupyterlab process...");
-        execute`pkill -f "jupyter-lab --no-browser --port=5002"`;
+        execute`pkill -f "jupyter-lab --no-browser`;
     } else {
         if (!IS_INSIDE_PUPPETEER && (!PACKAGE || minimatch("perspective-vieux", PACKAGE))) {
             console.log("-- Running Rust tests");
@@ -179,11 +179,16 @@ try {
 } catch (e) {
     console.log(e.message);
 
-    // Don't try to clean up if we are running the tests in Docker.
-    if (IS_JUPYTER && IS_LOCAL_PUPPETEER) {
-        // Cleanup at the end of the test run.
-        console.log("-- Cleaning up Jupyterlab process after test error...");
-        execute`pkill -f "jupyter-lab --no-browser --port=5002"`;
+    // Don't try to clean up if we are running the tests in Docker, as we
+    // can't execute the cleanup command in a non-Docker context once the
+    // whole script has been run in the Docker container.
+    if (IS_JUPYTER) {
+        if (IS_LOCAL_PUPPETEER) {
+            console.log("-- Cleaning up Jupyterlab process after test error...");
+            execute`pkill -f "jupyter-lab --no-browser"`;
+        } else {
+            console.error("-- Cannot clean up Jupyterlab process when tests are running in Docker!");
+        }
     }
 
     process.exit(1);
