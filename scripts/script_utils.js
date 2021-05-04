@@ -271,9 +271,12 @@ exports.docker = function docker(image = "puppeteer") {
         env_vars += bash` -ePSP_MANYLINUX=1 `;
     }
 
+    // Allow for host.docker.internal to be used, which allows Docker
+    // images to connect to servers hosted on localhost.
     let ret = bash`docker run \
         ${flags} \
         ${env_vars} \
+        --add-host=host.docker.internal:host-gateway \
         -v${CWD}:/usr/src/app/perspective \
         -w /usr/src/app/perspective --shm-size=2g -u root \
         --cpus="${CPUS}.0" ${IMAGE}`;

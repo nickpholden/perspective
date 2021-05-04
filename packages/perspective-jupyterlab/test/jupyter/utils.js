@@ -13,6 +13,7 @@ const notebook_template = require("./notebook_template.json");
 
 const DIST_ROOT = path.join(__dirname, "..", "..", "dist", "umd");
 const TEST_CONFIG_ROOT = path.join(__dirname, "..", "config", "jupyter");
+const IS_LOCAL_PUPPETEER = process.env.IS_LOCAL_PUPPETEER;
 
 const remove_jupyter_artifacts = () => {
     rimraf(path.join(TEST_CONFIG_ROOT, "lab"), () => {});
@@ -75,31 +76,6 @@ describe.jupyter = (body, {name, root} = {}) => {
 };
 
 /**
- * Perform screenshot tests on a Jupyterlab notebook composed of the given
- * `cells`, which should render a single `perspective-viewer` to the screen.
- *
- * @param {String} name The name of the test case.
- * @param {Array<String>} cells An array of string cells to be executed
- *  linearly in the resulting notebook. Cells are rendered as typed, so
- *  newlines, indents etc. must be in the cell text.
- * @param {*} body
- * @param {*} args
- */
-test.capture_jupyterlab = (name, cells, body, args = {}) => {
-    const notebook_name = `${name.replace(/[ \.']/g, "_")}.ipynb`;
-    generate_notebook(notebook_name, cells);
-
-    args = Object.assign(args, {
-        jupyter: true,
-        wait_for_update: false,
-        fail_on_errors: false,
-        url: `doc/tree/${notebook_name}`
-    });
-
-    test.capture(name, body, args);
-};
-
-/**
  * Execute body() on a Jupyter notebook without taking any screenshots.
  *
  * @param {*} name
@@ -110,8 +86,14 @@ test.jupyterlab = async (name, cells, body, args = {}) => {
     const notebook_name = `${name.replace(/[ \.']/g, "_")}.ipynb`;
     generate_notebook(notebook_name, cells);
     args = Object.assign(args, {
-        url: `doc/tree/${notebook_name}`
+        url: `doc/tree/${notebook_name}`,
+        host: "host.docker.internal"
     });
+
+    if (IS_LOCAL_PUPPETEER) {
+        delete args.host;
+    }
+
     await test.run(name, body, args);
 };
 

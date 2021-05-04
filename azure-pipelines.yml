@@ -145,16 +145,13 @@ jobs:
     - bash: jupyter labextension install packages/perspective-jupyterlab
       displayName: "Install perspective-jupyterlab"
 
-    - bash: yarn jlab_link
+    - bash: cd $(System.DefaultWorkingDirectory) && yarn jlab_link
       displayName: "Link local Perspective to Jupyterlab"
 
-    # TODO: no idea why this doesn't work here but does work inside all other
-    # invocations
-    - bash: yarn global add npm-run-all cpx
-      displayName: "Install deps again"
-
-    - bash: cd packages/perspective-jupyterlab && yarn test:jupyter
+    - bash: yarn test --jupyter
       displayName: "Run Jupyterlab tests"
+      env:
+        PSP_DOCKER: 1
 
 
 # - job: 'Linux'
